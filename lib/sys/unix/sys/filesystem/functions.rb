@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'ffi'
+require 'pp'
 
 module Sys
   class Filesystem
@@ -27,7 +28,12 @@ module Sys
       private_class_method :linux64?
 
       if linux64? || solaris?
-        attach_function(:statvfs, :statvfs64, %i[string pointer], :int)
+        begin
+          attach_function(:statvfs, :statvfs64, %i[string pointer], :int)
+          attach_function(:statvfs, %i[string pointer], :int)
+        rescue FFI::NotFoundError
+          attach_function(:statvfs, %i[string pointer], :int)
+        end
       else
         attach_function(:statvfs, %i[string pointer], :int)
       end
